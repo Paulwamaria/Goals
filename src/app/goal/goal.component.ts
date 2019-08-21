@@ -1,21 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import {Goal} from '../goal';
-
+import { GoalService } from '../goals-service/goal.service';
+import { AlertService } from '../alert-service/alert.service';
+import { HttpClient } from '@angular/common/http';
+import { Quote } from '../quote-class/quote';
+import { QuoteRequestService } from '../quote-http/quote-request.service';
 @Component({
   selector: 'app-goal',
   templateUrl: './goal.component.html',
   styleUrls: ['./goal.component.css']
 })
 export class GoalComponent implements OnInit {
-  goals: Goal[] = [
-   new Goal ( 1, 'Watch finding Nemo', 'Get an online version and watch Merlin find his son', new Date(2019, 4, 13), 0),
-  new Goal( 2, 'Buy Cookies',  'I have to buy cookies for me', new Date(2019, 10, 15), 0),
-  new Goal( 3,  'Get new Phone Case',  'Diana has her birthday comming soon', new Date(2019, 8, 18), 0),
-  new Goal( 4,  'Get Dog Food', 'Tommy loves expensive snacks and she bites when hungry', new Date(2019, 8, 22), 0),
-  new Goal( 5,  'Solve math homework',  'damn, I love Maths', new Date(2019, 8, 22), 0),
-  new Goal( 6,  'Plot my world domination plan',  'I want this world for myself', new Date(2019, 8, 22), 0),
-  ];
+  goals: Goal[]; // create a property goal of type Goal
+  alertService: AlertService; // create a property alertservice of type AlertService
+  quote: Quote; // Creates a property quote of type Quote
+  constructor(goalService: GoalService, alertService: AlertService, private http: HttpClient, private quoteService: QuoteRequestService) {
+    this.goals = goalService.getGoals();
+    this.alertService = alertService;
+  }
   addNewGoal(goal) {
+    // tslint:disable-next-line: prefer-const
     let goalLength = this.goals.length;
     goal.id = goalLength + 1;
     goal.completeDate = new Date(goal.completeDate);
@@ -33,16 +37,31 @@ if ( isComplete) {
 // a function to delete goals
 deleteGoal(isComplete, index) {
   if (isComplete) {
+    // tslint:disable-next-line: prefer-const
     let toDelete = confirm(`Are you sure you want to delete ${this.goals[index].name}? `);
     if (toDelete) {
       this.goals.splice(index, 1);
+      this.alertService.alertMe('The goal has been deleted');
     }
   }
 }
 
-  constructor() { }
+  // constructor() { }
 
   ngOnInit() {
+    this.quoteService.quoteRequest();
+    this.quote = this.quoteService.quote;
+    // interface ApiResponse {
+    //   author: string;
+    //   quote: string;
+    // }
+    // this.http.get<ApiResponse>('http://quotes.stormconsultancy.co.uk/random.json').subscribe(data => {
+    //   // Succesful API request
+    //   this.quote = new Quote(data.author, data.quote);
+    // }, err => {
+    //   this.quote = new Quote('Winston Churchill', 'Never ever give up');
+    //   console.log('An error occured');
+    // });
   }
 
 }
